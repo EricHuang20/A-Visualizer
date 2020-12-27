@@ -21,10 +21,10 @@ class Node:
         return self.row, self.col
 
     def isClosed(self):
-        return self.color == pygame.Color('purple')
+        return self.color == pygame.Color('orchid3')
     
     def isOpen(self):
-        return self.color == pygame.Color('orange')
+        return self.color == pygame.Color('plum1')
 
     def isWall(self):
         return self.color == pygame.Color('black')
@@ -39,10 +39,10 @@ class Node:
         self.color = pygame.Color('white')
 
     def makeClosed(self):
-        self.color = pygame.Color('purple')
+        self.color = pygame.Color('orchid3')
     
     def makeOpen(self):
-        self.color = pygame.Color('orange')
+        self.color = pygame.Color('plum1')
 
     def makeWall(self):
         self.color = pygame.Color('black')
@@ -61,6 +61,7 @@ class Node:
 
     def updateNeighbours(self, grid):
         self.neighbours = []
+        print(self.rows)
         if self.row < self.rows - 1 and not grid[self.row + 1][self.col].isWall(): #down
             self.neighbours.append(grid[self.row + 1][self.col])
 
@@ -70,7 +71,7 @@ class Node:
         if self.col < self.rows - 1 and not grid[self.row][self.col + 1].isWall(): #right
             self.neighbours.append(grid[self.row][self.col + 1])
 
-        if self.row > 0 and not grid[self.row][self.col - 1].isWall(): #left
+        if self.col > 0 and not grid[self.row][self.col - 1].isWall(): #left
             self.neighbours.append(grid[self.row][self.col - 1])
 
     def __lt__(self, other):
@@ -107,10 +108,12 @@ def algorithm(draw, grid, start, end):
         
         current = openSet.get()[2]
         openSetHash.remove(current)
+
         if current == end: #make path
             reconstructPath(cameFrom, end, draw)
             end.makeEnd()
             start.makeStart()
+
             return True
 
         for neighbour in current.neighbours:
@@ -129,7 +132,7 @@ def algorithm(draw, grid, start, end):
 
         if current != start:
             current.makeClosed()
-
+    
     return False
 
 def makeGrid(rows, width):
@@ -171,10 +174,8 @@ def getClickedPos(pos, rows, width):
 def main(win, width):
     rows = 50
     grid = makeGrid(rows, width)
-    
     start = None
     end = None
-
     run = True
     
     while run:
@@ -218,8 +219,6 @@ def main(win, width):
                     end = None
                     grid = makeGrid(rows, width)
                 
-            
-
     pygame.quit()
 
 main(win, width)
