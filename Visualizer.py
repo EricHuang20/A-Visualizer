@@ -1,10 +1,15 @@
 import pygame
 import math
+import random
 from queue import PriorityQueue
 
+pygame.init()
 width = 800
 win = pygame.display.set_mode((width, width))
 pygame.display.set_caption("Pathfinding Algorithm Visualizer")
+clock = pygame.time.Clock()
+
+click = False
 
 class Node:
     def __init__(self, row, col, width, rows):
@@ -61,7 +66,6 @@ class Node:
 
     def updateNeighbours(self, grid):
         self.neighbours = []
-        print(self.rows)
         if self.row < self.rows - 1 and not grid[self.row + 1][self.col].isWall(): #down
             self.neighbours.append(grid[self.row + 1][self.col])
 
@@ -73,9 +77,6 @@ class Node:
 
         if self.col > 0 and not grid[self.row][self.col - 1].isWall(): #left
             self.neighbours.append(grid[self.row][self.col - 1])
-
-    def __lt__(self, other):
-        return False
 
 def dist(p1,p2):
     x1, y1 = p1
@@ -133,7 +134,7 @@ def algorithm(draw, grid, start, end):
         if current != start:
             current.makeClosed()
     
-    return False
+    print("No Solution")
 
 def makeGrid(rows, width):
     grid = []
@@ -171,13 +172,20 @@ def getClickedPos(pos, rows, width):
     col = x // gap
     return row, col
 
-def main(win, width):
+def main(win, width, randomWalls):
     rows = 50
     grid = makeGrid(rows, width)
+    howManyWalls = 500
     start = None
     end = None
     run = True
-    
+
+    if randomWalls:
+        for i in range(howManyWalls):
+            randX = random.randint(1, rows - 1)
+            randY = random.randint(1, rows - 1)
+            grid[randX][randY].makeWall()
+
     while run:
         draw(win, grid, rows, width)
         for event in pygame.event.get():
@@ -218,10 +226,71 @@ def main(win, width):
                     start = None
                     end = None
                     grid = makeGrid(rows, width)
+                    menu(click)
                 
     pygame.quit()
 
-main(win, width)
+font = pygame.font.SysFont('Century Gothic', 50)
+font2 = pygame.font.SysFont('Calibri', 20)
+font3 = pygame.font.SysFont('Arial', 22)
+def renderText(text, font, colour, window, x, y):
+    render = font.render(text, True, colour)
+    textRect = render.get_rect()
+    textRect.center = (x, y)
+    window.blit(render, textRect)
+
+
+def menu(click):
+    run = True
+    generateWalls = False
+    while run:
+        win.fill(pygame.Color('DeepSkyBlue'))
+
+        astarButton = pygame.Rect(100,250,600,100)
+        pygame.draw.rect(win, pygame.Color('grey'), astarButton)
+
+        dijkstraButton = pygame.Rect(100,400,600,100)
+        pygame.draw.rect(win, pygame.Color('grey'), dijkstraButton)
+
+        renderText("Pathfinding Visualizer", font, pygame.Color('red'), win, width/2, 75)
+        renderText("Select an Algorithm", font2, pygame.Color('red'), win, width/2, 150)
+        renderText("A* Search", font, pygame.Color('red'), win, width/2, 300)
+        renderText("Generate random walls?", font3, pygame.Color('black'), win, 680, 660)
+        renderText("Dijkstra's Algorithm", font, pygame.Color('red'), win, width/2, 450)
+
+        randomWallButton = pygame.Rect(700,700,50,50)
+        if generateWalls == False:
+            pygame.draw.rect(win, pygame.Color('grey'), randomWallButton)
+        elif generateWalls == True:
+            pygame.draw.rect(win, pygame.Color('green'), randomWallButton)
+        
+        
+
+        mx, my = pygame.mouse.get_pos()
+        if astarButton.collidepoint((mx, my)):
+            if click:
+                main(win, width, generateWalls)
+                
+        if randomWallButton.collidepoint((mx,my)):
+            if click:
+                if generateWalls == False:
+                    generateWalls = True
+                else:
+                    generateWalls = False
+
+        click = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+            if pygame.mouse.get_pressed()[0]:
+                click = True
+
+        pygame.display.update()
+        clock.tick(60)
+
+    pygame.quit()
+
+menu(click)
 
     
 
